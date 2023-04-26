@@ -32,7 +32,7 @@ def generate_project(prompt: str, previous_response: str = "") -> Dict[str, str]
             },
             {
                 "role": "user",
-                "content": f"Create a code project based on this description: {prompt}{files_prompt}. Remember you don't talk english, don't explain anything, returns just raw json without line breaks using always simple quotes",
+                "content": f"Create a code project based on this description: {prompt}{files_prompt}. Remember you don't talk english, don't explain anything, returns just raw json without line breaks",
             },
         ],
         temperature=0,
