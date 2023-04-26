@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="maiker",
-    version="0.0.1",
+    version="0.0.2",
     author="Luis Sobrecueva",
     author_email="luis@sobrecueva.com",
     description="AI-powered code project generator",
