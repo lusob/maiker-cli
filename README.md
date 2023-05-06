@@ -3,6 +3,8 @@
 Maiker is an AI-powered coding project generator that uses OpenAI's GPT-3.5 to generate entire code projects from a user-provided prompt. 
 ![maiker-cli](https://user-images.githubusercontent.com/480507/236608705-0d22225b-64da-4ff3-957f-aee91901e9f6.jpeg)
 
+This is the command line version of the [maiker](https://github.com/lusob/maiker/) vscode extension
+
 ## Features
 
 - Generates entire code projects based on user-provided prompts
