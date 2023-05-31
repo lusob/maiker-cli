@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import json
 import os
+import webbrowser
 from typing import Dict
 
 import click
@@ -13,26 +14,33 @@ load_dotenv()
 # Set up OpenAI API client
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
+def generate_project(prompt: str, previous_response: str = "", type: str = "code") -> Dict[str, str]:
+    """
+    Given a project prompt, generate the corresponding project using OpenAI's GPT-3.5
+    """
 
-def generate_project(prompt: str, previous_response: str = "") -> Dict[str, str]:
-    """
-    Given a project prompt, generate the corresponding code project using OpenAI's GPT-3.5
-    """
-    files_prompt = (
-        f" You have already generated these files: {previous_response}, dont return them again, just return the rest of needed files to complete the project or returns an empty response if there are no more files to return."
-        if previous_response
-        else ""
-    )
+    if type == "presentation":
+        system_prompt = 'You are a reveal.js presentation generator API to generate html presentations from a description using reveal.js (importing it from https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.6.0/js/reveal.min.js and initialize reveal at the end of the html, like \"<script>Reveal.initialize();</script></html>\"). Your returns html code in a file in raw json format {"<filename>": "<html code>"} directly in the response content.'
+        user_prompt = f"Create a 10 slides reveal.js presentation with beautiful background picture and text(title and bullet points) based on this prompt: \"{prompt}\". Remember you don't talk english, don't explain anything, returns just raw json without line breaks"
+    else:
+        files_prompt = (
+            f" You have already generated these files: {previous_response}, dont return them again, just return the rest of needed files to complete the project or returns an empty response if there are no more files to return."
+            if previous_response
+            else ""
+        )
+        system_prompt = 'You are a project code generator API to generate coding projects from a description. Your returns code in separated files in raw json format {"<filename>": "<code>"} directly in the response content.'
+        user_prompt = f"Create a code project based on this description: {prompt}{files_prompt}. Remember you don't talk english, don't explain anything, returns just raw json without line breaks"
+    
     completion = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
             {
                 "role": "system",
-                "content": 'You are a project code generator API to generate coding projects from a description. Your returns code in separated files in raw json format {"<filename>": "<code>"} directly in the response content.',
+                "content": system_prompt,
             },
             {
                 "role": "user",
-                "content": f"Create a code project based on this description: {prompt}{files_prompt}. Remember you don't talk english, don't explain anything, returns just raw json without line breaks",
+                "content": user_prompt,
             },
         ],
         temperature=0,
@@ -57,24 +65,22 @@ def generate_project(prompt: str, previous_response: str = "") -> Dict[str, str]
     default="./maiker-generated-project",
     help="The directory where the generated code files will be saved.",
 )
-def main(prompt: str, output_dir: str):
+@click.option('-t', '--type', required=False, type=click.Choice(['code', 'presentation']), default='code')
+
+def main(prompt: str, output_dir: str, type: str):
     """
-    Given a project prompt, generate the corresponding code project using OpenAI's GPT-3.
+    Given a project prompt, generate the corresponding project using OpenAI's GPT-3.
     """
     # Ensure the output directory exists
     os.makedirs(output_dir, exist_ok=True)
 
     # Generate the code project
-    click.echo(f"Generating code project from prompt: {prompt}")
-    generated_code = generate_project(prompt)
-
-    generated_files = []
+    click.echo(f"Generating {type} project from prompt: {prompt}")
 
     max_loops = 1 # Number of calls to the model, increase it for complex projects
     generated_files = []
-
-    for loop in range(max_loops):
-        generated_code = generate_project(prompt, ",".join(generated_files))
+    for _loop in range(max_loops):
+        generated_code = generate_project(prompt, ",".join(generated_files), type)
 
         for filename, contents in generated_code.items():
             file_path = os.path.join(output_dir, filename)
@@ -86,11 +92,19 @@ def main(prompt: str, output_dir: str):
                 f.write(contents)
                 generated_files.append(filename)
 
-        click.echo(f"Generated code: {generated_code}")
-        click.echo(f"Generated files: {generated_files}")
+        #click.echo(f"Generated code: {generated_code}")
+        #click.echo(f"Generated files: {generated_files}")
 
     # Print success message to console
-    click.echo(f"Code generation successful. Project files saved to {output_dir}.")
+    click.echo(f"Project generation successful. Project files saved to {output_dir}.")
+
+    if type == 'presentation':
+        presentation_file = generated_files[0]
+        try:
+            webbrowser.open(os.path.join(output_dir, presentation_file))
+        except Exception:
+            print(f"Error running the web browser, you can try to open the outputfile: {output_file} manually")
+
 
 
 if __name__ == "__main__":

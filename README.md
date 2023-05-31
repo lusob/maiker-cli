@@ -8,13 +8,14 @@ This is the command line version of the [maiker](https://github.com/lusob/maiker
 ## Features
 
 - Generates entire code projects based on user-provided prompts
-- Uses OpenAI's ChatGPT-3.5 model for code generation
-- Outputs code to a local project directory
+- Generates entire slide presentations based on user-provided prompts
+- Uses OpenAI's GPT-3.5 for code generation
+- Outputs to a local project directory
 
 ## Installation
 
-1. Install the CLI globally: `pip install git+https://github.com/lusob/maiker-cli.git`.
-2. Set your OpenAI API key: `export OPENAI_API_KEY="<your-open-api-key>"`.
+1. Install the CLI globally: `pip3 install maiker`.
+2. Set your OpenAI API key: `export OPENAI_API_KEY="<your-open-api-key>"`. or adding it to the .env file (first rename the .env.example to .env)
 3. Use the `maiker` command to generate a code project from a user-provided prompt, for example:
     
     ```
